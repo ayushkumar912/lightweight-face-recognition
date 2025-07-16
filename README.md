@@ -49,67 +49,37 @@ chmod +x run.sh
 
 ## 🏗️ System Architecture
 
-```
-┌─────────────────────────────────────┐    HTTP/REST API    ┌─────────────────────────────────────┐    Direct Processing    ┌─────────────────────────────────────┐
-│           WEB FRONTEND              │◄──────────────────►│         FLASK API SERVER           │◄───────────────────────►│      DLIB FACE RECOGNITION         │
-│                                     │                     │                                     │                         │                                     │
-│  🎥 WebRTC Camera Interface:        │                     │  🔌 REST Endpoints:                │                         │  🤖 Dlib Models:                   │
-│     • getUserMedia() API            │                     │     • POST /recognize              │                         │     • HOG Frontal Face Detector    │
-│     • 640x480 video stream          │                     │     • POST /register_person        │                         │     • 68-Point Landmark Predictor  │
-│     • HTML5 Canvas capture          │                     │     • GET /attendance              │                         │     • ResNet Face Recognition v1   │
-│                                     │                     │     • GET /health                  │                         │                                     │
-│  📸 Image Processing:               │                     │                                     │                         │  🔍 Detection Pipeline:            │
-│     • Real-time frame capture       │                     │  📊 Request Processing:            │                         │     1. RGB → Grayscale conversion  │
-│     • Base64 encoding               │                     │     • Multipart form data          │                         │     2. Face detection (HOG+SVM)    │
-│     • Canvas.toDataURL()            │                     │     • JSON payload handling        │                         │     3. Facial landmark detection   │
-│                                     │                     │     • Error handling & logging     │                         │     4. 128-dim face encoding       │
-│  🎛️ UI Controls:                    │                     │                                     │                         │                                     │
-│     • Auto-capture toggle           │                     │  ⚙️ Configuration:                 │                         │  📐 Mathematical Operations:       │
-│     • Threshold slider (0.3-0.9)    │                     │     • Recognition threshold        │                         │     • Euclidean distance calc      │
-│     • Capture interval (1-10s)      │                     │     • CORS enabled                 │                         │     • Distance < 0.6 = match       │
-│     • Manual capture button         │                     │     • 50MB max file size           │                         │     • NumPy array operations       │
-└─────────────────────────────────────┘                     └─────────────────────────────────────┘                         └─────────────────────────────────────┘
-         │                                                             │                                                             │
-         │ Base64 Images                                               │ Face Detection Results                                     │ Face Encodings
-         │ User Interactions                                           │ Recognition Status                                         │ Distance Calculations
-         │                                                             │                                                             │
-         ▼                                                             ▼                                                             ▼
-┌─────────────────────────────────────┐                     ┌─────────────────────────────────────┐                         ┌─────────────────────────────────────┐
-│        AUTO REGISTRATION            │                     │         ATTENDANCE SYSTEM           │                         │        KNOWN FACES DATABASE        │
-│                                     │                     │                                     │                         │                                     │
-│  🔄 Unknown Face Detection:         │                     │  📋 CSV Data Management:           │                         │  💾 File System Storage:           │
-│     • No match found (dist > 0.6)   │                     │     • Name, Timestamp, Confidence  │                         │     • Person-specific directories  │
-│     • Automatic name prompt         │                     │     • Real-time append operations  │                         │     • JPEG images (85% quality)    │
-│     • Modal dialog interface        │                     │     • Duplicate prevention         │                         │     • Filename: PersonName_N.jpg   │
-│                                     │                     │     • Export functionality         │                         │                                     │
-│  📷 30-Frame Capture Process:       │                     │                                     │                         │  🧠 Encoding Cache:                │
-│     • 5 FPS capture rate            │                     │  📊 Attendance Analytics:          │                         │     • Pre-computed face encodings  │
-│     • Quality validation per frame  │                     │     • Real-time dashboard          │                         │     • In-memory numpy arrays       │
-│     • Only valid faces saved        │                     │     • Filtering by name/date       │                         │     • Automatic reload on changes  │
-│     • ~6 second total capture       │                     │     • Statistics generation        │                         │     • Multiple encodings per person│
-│                                     │                     │                                     │                         │                                     │
-│  ✅ Immediate Training:             │                     │  🔔 Real-time Notifications:       │                         │  🔄 Dynamic Updates:               │
-│     • Instant encoding generation   │                     │     • Success/error messages       │                         │     • Automatic directory scanning │
-│     • Database reload trigger       │                     │     • UI status updates            │                         │     • New person detection         │
-│     • Ready for recognition         │                     │     • Confidence score display     │                         │     • Memory optimization          │
-└─────────────────────────────────────┘                     └─────────────────────────────────────┘                         └─────────────────────────────────────┘
+![System Architecture](System_Architecture.jpeg)
 
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                                           🔧 TECHNICAL IMPLEMENTATION DETAILS                                                                      │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│  📚 Libraries & Frameworks:                        │  🎯 Performance Optimizations:                    │  🛡️ Error Handling & Reliability:              │
-│     • Frontend: Bootstrap 5 + Vanilla JS           │     • CPU-only processing (no GPU required)       │     • Global exception handlers                 │
-│     • Backend: Flask + OpenCV + Dlib + NumPy       │     • Memory-efficient image processing           │     • JSON-only API responses                   │
-│     • Image: PIL/Pillow for format conversion      │     • Lazy loading of face encodings              │     • Graceful camera access failures          │
-│                                                     │     • Optimized for MacBook M2 (8GB RAM)          │     • Automatic retry mechanisms               │
-│  🔢 Image Processing Pipeline:                     │                                                    │                                                 │
-│     1. WebRTC → HTML5 Canvas                       │  💾 Data Persistence:                             │  🌐 Network & Communication:                   │
-│     2. Canvas → Base64 PNG                         │     • CSV attendance logs                         │     • CORS enabled for development             │
-│     3. Base64 → PIL Image                          │     • File system for face images                 │     • RESTful API design                       │
-│     4. PIL → OpenCV numpy array                    │     • In-memory encoding cache                    │     • Multipart form data support              │
-│     5. OpenCV → Dlib processing                    │     • Automatic backup on registration            │     • JSON content negotiation                 │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+### Key Components:
+
+**🌐 Web Frontend**
+- WebRTC camera interface with getUserMedia() API
+- Bootstrap 5 UI with real-time display
+- Auto-capture and manual recognition controls
+
+**🔌 Flask API Server**  
+- RESTful endpoints for recognition and registration
+- Real-time attendance logging and CSV export
+- Comprehensive error handling and validation
+
+**🤖 Dlib Recognition Engine**
+- HOG frontal face detector for initial detection
+- 68-point facial landmark predictor for alignment  
+- ResNet-based face recognition model for encoding
+- Euclidean distance matching with 0.6 threshold
+
+**� Storage Systems**
+- Auto-registration with 30-frame capture process
+- Person-specific directories with JPEG images
+- Pre-computed face encodings for fast matching
+- CSV attendance logs with timestamps and confidence
+
+### Data Flow:
+1. **Camera** → WebRTC capture → Base64 encoding
+2. **API** → Image processing → Face detection  
+3. **Recognition** → Encoding generation → Distance calculation
+4. **Results** → Attendance logging or registration prompt
 
 ## 📁 Project Structure
 
