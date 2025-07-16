@@ -12,15 +12,14 @@ A production-ready face recognition attendance system with modern web interface,
 - **💪 Direct Dlib Implementation** - Reliable face detection and recognition
 - **⚡ Optimized Performance** - CPU-only processing, no GPU required
 
-## 🚀 Quick Start```bash
+## 🚀 Quick Start
 
+```bash
 # Clone and setup everything
-
 git clone https://github.com/ayushkumar912/lightweight-face-recognition.git
 cd lightweight-face-recognition
 chmod +x run.sh
 ./run.sh
-
 ```
 
 **That's it!** The system will:
@@ -36,16 +35,19 @@ chmod +x run.sh
 ## 📱 How to Use
 
 ### 1. **Real-Time Recognition**
+
 - Click "Start Auto Capture"
 - Point camera at known faces
 - System automatically recognizes and logs attendance
 
 ### 2. **Register New People**
+
 - Unknown face detected → System automatically prompts for name
 - Enter person's name → System captures 30 training frames
 - Person is immediately available for recognition
 
 ### 3. **View Attendance**
+
 - Real-time attendance display on dashboard
 - Download CSV reports
 - View confidence scores and timestamps
@@ -57,28 +59,33 @@ chmod +x run.sh
 ### Key Components:
 
 **🌐 Web Frontend**
+
 - WebRTC camera interface with getUserMedia() API
 - Bootstrap 5 UI with real-time display
 - Auto-capture and manual recognition controls
 
 **🔌 Flask API Server**
+
 - RESTful endpoints for recognition and registration
 - Real-time attendance logging and CSV export
 - Comprehensive error handling and validation
 
 **🤖 Dlib Recognition Engine**
+
 - HOG frontal face detector for initial detection
 - 68-point facial landmark predictor for alignment
 - ResNet-based face recognition model for encoding
 - Euclidean distance matching with 0.6 threshold
 
 **� Storage Systems**
+
 - Auto-registration with 30-frame capture process
 - Person-specific directories with JPEG images
 - Pre-computed face encodings for fast matching
 - CSV attendance logs with timestamps and confidence
 
 ### Data Flow:
+
 1. **Camera** → WebRTC capture → Base64 encoding
 2. **API** → Image processing → Face detection
 3. **Recognition** → Encoding generation → Distance calculation
@@ -87,35 +94,33 @@ chmod +x run.sh
 ## 📁 Project Structure
 
 ```
-
 lightweight-face-recognition/
-├── 📜 README.md # This comprehensive guide
-├── 🚀 run.sh # One-command setup and start
-├── 📋 requirements.txt # Python dependencies
-├── 📄 LICENSE # MIT License
+├── 📜 README.md                    # This comprehensive guide
+├── 🚀 run.sh                       # One-command setup and start
+├── 📋 requirements.txt             # Python dependencies
+├── 📄 LICENSE                      # MIT License
 │
-├── 🔌 api/ # Flask API Server
-│ ├── app.py # Main Flask application
-│ ├── start_api.sh # API startup script
-│ └── attendance.csv # Generated attendance log
+├── 🔌 api/                         # Flask API Server
+│   ├── app.py                      # Main Flask application
+│   ├── start_api.sh                # API startup script
+│   └── attendance.csv              # Generated attendance log
 │
-├── 🧠 backend/ # Face Recognition Engine
-│ ├── direct_recognizer.py # Direct Dlib implementation
-│ ├── known_faces/ # Training images database
-│ │ ├── PersonName1/ # Individual person folders
-│ │ └── PersonName2/ # Auto-created during registration
-│ └── resorces/ # Dlib model files
-│ ├── shape_predictor_68_face_landmarks.dat
-│ └── dlib_face_recognition_resnet_model_v1.dat
+├── 🧠 backend/                     # Face Recognition Engine
+│   ├── direct_recognizer.py        # Direct Dlib implementation
+│   ├── known_faces/                # Training images database
+│   │   ├── PersonName1/            # Individual person folders
+│   │   └── PersonName2/            # Auto-created during registration
+│   └── resorces/                   # Dlib model files
+│       ├── shape_predictor_68_face_landmarks.dat
+│       └── dlib_face_recognition_resnet_model_v1.dat
 │
-└── 🌐 frontend/ # Web Interface
-├── templates/
-│ └── index.html # Main web interface
-└── static/
-├── style.css # Bootstrap styling
-└── script.js # Camera and registration logic
-
-````
+└── 🌐 frontend/                    # Web Interface
+    ├── templates/
+    │   └── index.html              # Main web interface
+    └── static/
+        ├── style.css               # Bootstrap styling
+        └── script.js               # Camera and registration logic
+```
 
 ## 🔧 API Endpoints
 
@@ -134,7 +139,7 @@ Content-Type: multipart/form-data
   "attendance_logged": true,
   "timestamp": "2025-07-17T04:12:52"
 }
-````
+```
 
 ### Registration
 
