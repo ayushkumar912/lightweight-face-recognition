@@ -355,7 +355,6 @@ For issues and questions:
 
 - 🐛 **Bugs**: [GitHub Issues](https://github.com/ayushkumar912/lightweight-face-recognition/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/ayushkumar912/lightweight-face-recognition/discussions)
-- 📧 **Email**: ayushkumar912@example.com
 
 ---
 
