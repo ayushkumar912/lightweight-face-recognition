@@ -13,17 +13,20 @@ A production-ready face recognition attendance system with modern web interface,
 - **⚡ Optimized Performance** - CPU-only processing, no GPU required
 
 ## 🚀 Quick Start```bash
+
 # Clone and setup everything
+
 git clone https://github.com/ayushkumar912/lightweight-face-recognition.git
 cd lightweight-face-recognition
 chmod +x run.sh
 ./run.sh
+
 ```
 
 **That's it!** The system will:
 
 1. ✅ Create virtual environment
-2. ✅ Install all dependencies 
+2. ✅ Install all dependencies
 3. ✅ Validate Dlib models
 4. ✅ Start the web server
 5. ✅ Open the interface automatically
@@ -33,7 +36,7 @@ chmod +x run.sh
 ## 📱 How to Use
 
 ### 1. **Real-Time Recognition**
-- Click "Start Auto Capture" 
+- Click "Start Auto Capture"
 - Point camera at known faces
 - System automatically recognizes and logs attendance
 
@@ -58,14 +61,14 @@ chmod +x run.sh
 - Bootstrap 5 UI with real-time display
 - Auto-capture and manual recognition controls
 
-**🔌 Flask API Server**  
+**🔌 Flask API Server**
 - RESTful endpoints for recognition and registration
 - Real-time attendance logging and CSV export
 - Comprehensive error handling and validation
 
 **🤖 Dlib Recognition Engine**
 - HOG frontal face detector for initial detection
-- 68-point facial landmark predictor for alignment  
+- 68-point facial landmark predictor for alignment
 - ResNet-based face recognition model for encoding
 - Euclidean distance matching with 0.6 threshold
 
@@ -77,40 +80,42 @@ chmod +x run.sh
 
 ### Data Flow:
 1. **Camera** → WebRTC capture → Base64 encoding
-2. **API** → Image processing → Face detection  
+2. **API** → Image processing → Face detection
 3. **Recognition** → Encoding generation → Distance calculation
 4. **Results** → Attendance logging or registration prompt
 
 ## 📁 Project Structure
 
 ```
+
 lightweight-face-recognition/
-├── 📜 README.md                    # This comprehensive guide
-├── 🚀 run.sh                       # One-command setup and start
-├── 📋 requirements.txt             # Python dependencies
-├── 📄 LICENSE                      # MIT License
+├── 📜 README.md # This comprehensive guide
+├── 🚀 run.sh # One-command setup and start
+├── 📋 requirements.txt # Python dependencies
+├── 📄 LICENSE # MIT License
 │
-├── 🔌 api/                         # Flask API Server
-│   ├── app.py                      # Main Flask application
-│   ├── start_api.sh                # API startup script
-│   └── attendance.csv              # Generated attendance log
+├── 🔌 api/ # Flask API Server
+│ ├── app.py # Main Flask application
+│ ├── start_api.sh # API startup script
+│ └── attendance.csv # Generated attendance log
 │
-├── 🧠 backend/                     # Face Recognition Engine
-│   ├── direct_recognizer.py        # Direct Dlib implementation
-│   ├── known_faces/                # Training images database
-│   │   ├── PersonName1/            # Individual person folders
-│   │   └── PersonName2/            # Auto-created during registration
-│   └── resorces/                   # Dlib model files
-│       ├── shape_predictor_68_face_landmarks.dat
-│       └── dlib_face_recognition_resnet_model_v1.dat
+├── 🧠 backend/ # Face Recognition Engine
+│ ├── direct_recognizer.py # Direct Dlib implementation
+│ ├── known_faces/ # Training images database
+│ │ ├── PersonName1/ # Individual person folders
+│ │ └── PersonName2/ # Auto-created during registration
+│ └── resorces/ # Dlib model files
+│ ├── shape_predictor_68_face_landmarks.dat
+│ └── dlib_face_recognition_resnet_model_v1.dat
 │
-└── 🌐 frontend/                    # Web Interface
-    ├── templates/
-    │   └── index.html              # Main web interface
-    └── static/
-        ├── style.css               # Bootstrap styling
-        └── script.js               # Camera and registration logic
-```
+└── 🌐 frontend/ # Web Interface
+├── templates/
+│ └── index.html # Main web interface
+└── static/
+├── style.css # Bootstrap styling
+└── script.js # Camera and registration logic
+
+````
 
 ## 🔧 API Endpoints
 
@@ -129,7 +134,7 @@ Content-Type: multipart/form-data
   "attendance_logged": true,
   "timestamp": "2025-07-17T04:12:52"
 }
-```
+````
 
 ### Registration
 
@@ -188,6 +193,7 @@ GET /health
 ## ⚙️ Technical Specifications
 
 ### Face Recognition Engine
+
 - **Detection**: Dlib HOG + Linear SVM detector
 - **Landmarks**: 68-point facial landmark predictor
 - **Encoding**: ResNet-based 128-dimensional face descriptor
@@ -195,6 +201,7 @@ GET /health
 - **Performance**: ~100-200ms per frame on MacBook M2
 
 ### Registration Process
+
 - **Frame Count**: 30 frames at 5 FPS (6-second capture)
 - **Quality Filtering**: Only frames with detected faces are saved
 - **Format**: JPEG images at 85% quality
@@ -202,6 +209,7 @@ GET /health
 - **Storage**: Organized in person-specific directories
 
 ### Web Interface
+
 - **Frontend**: Bootstrap 5 + Vanilla JavaScript
 - **Camera**: WebRTC getUserMedia API
 - **Capture**: HTML5 Canvas for frame processing
@@ -245,23 +253,25 @@ cp face2.jpg backend/known_faces/"Person Name"/
 
 Based on testing with MacBook Air M2:
 
-| Operation | Time | Accuracy |
-|-----------|------|----------|
-| Face Detection | ~50ms | 95%+ |
-| Face Recognition | ~100ms | 90%+ |
-| Registration (30 frames) | ~20s | 85%+ valid frames |
-| Database Reload | ~500ms | 100% |
+| Operation                | Time   | Accuracy          |
+| ------------------------ | ------ | ----------------- |
+| Face Detection           | ~50ms  | 95%+              |
+| Face Recognition         | ~100ms | 90%+              |
+| Registration (30 frames) | ~20s   | 85%+ valid frames |
+| Database Reload          | ~500ms | 100%              |
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 **"No face detected"**
+
 - Ensure good lighting
 - Face should be clearly visible and front-facing
 - Remove glasses/masks if possible during registration
 
 **"Import error: dlib"**
+
 ```bash
 # Install dlib dependencies
 pip install cmake
@@ -269,11 +279,13 @@ pip install dlib
 ```
 
 **"Camera not working"**
+
 - Grant camera permissions in browser
 - Try different browser (Chrome recommended)
 - Check if camera is used by other applications
 
 **"Server won't start"**
+
 ```bash
 # Check port availability
 lsof -i :5000
@@ -335,6 +347,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For issues and questions:
+
 - 🐛 **Bugs**: [GitHub Issues](https://github.com/ayushkumar912/lightweight-face-recognition/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/ayushkumar912/lightweight-face-recognition/discussions)
 - 📧 **Email**: ayushkumar912@example.com
