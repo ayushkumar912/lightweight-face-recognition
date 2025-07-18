@@ -1,0 +1,112 @@
+# Docker ignore file for face recognition system
+# Ignore development and build artifacts
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Documentation
+README.md
+*.md
+docs/
+LICENSE
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Dependencies lock files (keep requirements.txt)
+package-lock.json
+yarn.lock
+
+# Shell scripts (except for internal usage)
+run.sh
+api/start_api.sh
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Test files
+test/
+tests/
+*_test.py
+test_*.py
+
+# Configuration files that might contain secrets
+config.ini
+.env.local
+.env.production

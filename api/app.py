@@ -17,6 +17,10 @@ import numpy as np
 from flask import Flask, jsonify, render_template, request, send_from_directory
 from PIL import Image
 
+# Prometheus metrics
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+import time
+
 # Add backend to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
 from direct_recognizer import create_direct_recognizer
@@ -24,6 +28,15 @@ from direct_recognizer import create_direct_recognizer
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+REQUEST_COUNT = Counter('face_recognition_requests_total', 'Total requests', ['method', 'endpoint', 'status'])
+REQUEST_DURATION = Histogram('face_recognition_request_duration_seconds', 'Request duration', ['method', 'endpoint'])
+FACE_RECOGNITION_COUNT = Counter('face_recognitions_total', 'Total face recognitions', ['result'])
+FACE_RECOGNITION_CONFIDENCE = Histogram('face_recognition_confidence', 'Face recognition confidence scores')
+ATTENDANCE_COUNT = Counter('attendance_records_total', 'Total attendance records')
+KNOWN_FACES_GAUGE = Gauge('known_faces_count', 'Number of known faces in system')
+ACTIVE_CONNECTIONS = Gauge('active_connections', 'Number of active connections')
 
 # Initialize Flask app with frontend paths
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
@@ -33,6 +46,29 @@ app = Flask(
     static_folder=os.path.join(frontend_dir, "static"),
 )
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max file size
+
+# Prometheus middleware
+@app.before_request
+def before_request():
+    request.start_time = time.time()
+    ACTIVE_CONNECTIONS.inc()
+
+@app.after_request
+def after_request(response):
+    request_duration = time.time() - request.start_time
+    REQUEST_DURATION.labels(
+        method=request.method,
+        endpoint=request.endpoint or 'unknown'
+    ).observe(request_duration)
+    
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.endpoint or 'unknown',
+        status=response.status_code
+    ).inc()
+    
+    ACTIVE_CONNECTIONS.dec()
+    return response
 
 # Global error handler to ensure JSON responses
 @app.errorhandler(Exception)
@@ -191,6 +227,16 @@ def health_check():
     )
 
 
+@app.route("/metrics")
+def metrics():
+    """Prometheus metrics endpoint."""
+    # Update known faces gauge
+    if recognizer:
+        KNOWN_FACES_GAUGE.set(len(recognizer.known_encodings))
+    
+    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
+
 @app.route("/recognize", methods=["POST"])
 def recognize_face():
     """Face recognition endpoint with automatic attendance logging."""
@@ -237,6 +283,17 @@ def recognize_face():
         # Add timestamp and threshold info
         result["timestamp"] = datetime.now().isoformat()
         result["threshold"] = threshold
+
+        # Update Prometheus metrics
+        if result.get("face_detected"):
+            if result.get("name"):
+                FACE_RECOGNITION_COUNT.labels(result='recognized').inc()
+                FACE_RECOGNITION_CONFIDENCE.observe(result.get("confidence", 0))
+                ATTENDANCE_COUNT.inc()
+            else:
+                FACE_RECOGNITION_COUNT.labels(result='unknown').inc()
+        else:
+            FACE_RECOGNITION_COUNT.labels(result='no_face').inc()
 
         # Log attendance if person is recognized
         if result.get("face_detected") and result.get("name"):
