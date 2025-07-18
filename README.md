@@ -1,8 +1,53 @@
 # 🎯 Real-Time Face Recognition Attendance System
 
-A production-ready, containerized face recognition attendance system with mo**📊 Storage Systems**
+A production-ready, containerized face recognition attendance system with mo\*\*📊 Storage ## 🌐 Application Access Points
 
-- Auto-registration with 30-frame capture process
+Once running## 📱 How to Use the Interface
+
+### **🚀 Getting Started**
+
+1. **Visit the application**: http://localhost:5000 (or http://localhost via Nginx)
+2. **Monitor performance**: http://localhost:3000 (Grafana - admin/admin)
+3. **Check metrics**: http://localhost:9090 (Prometheus)
+
+### 1. **🎥 Real-Time Face Recognition**
+
+- Click **"Start Auto Capture"** button
+- Point your camera at faces
+- System automatically recognizes known people and logs attendance
+- View real-time confidence scores and timestamps
+
+### 2. **👤 Register New People**
+
+- When an unknown face appears, system automatically prompts for namem provides multiple interfaces and services:
+
+### **🎯 Main Application (Web Interfaces)**
+
+- **Direct Access**: http://localhost:5000 ✅ _Full web interface_
+- **Load Balanced**: http://localhost ✅ _Same interface via Nginx proxy_
+
+### **📊 Monitoring & Analytics (Web Dashboards)**
+
+- **Prometheus Metrics**: http://localhost:9090 ✅ _Metrics and monitoring_
+- **Grafana Dashboards**: http://localhost:3000 ✅ _Visual analytics (admin/admin)_
+
+### **🗄️ Backend Services (No Web Interface)**
+
+- **Redis Cache**: localhost:6379 ⚙️ _Database service - use Redis CLI_
+- **Nginx Load Balancer**: Port 80/443 ⚙️ _Proxy service - routes to main app_
+
+> **💡 Note**: Redis and Nginx don't have web interfaces - they're backend services. Redis is a database cache, and Nginx is a reverse proxy that routes traffic to your main application.
+
+### **🔍 Service Health Check**
+
+````bash
+# Test all services
+curl http://localhost:5000/health     # Main app
+curl http://localhost:9090/-/healthy  # Prometheus
+curl http://localhost:3000/api/health # Grafana
+docker exec face-recognition-redis redis-cli ping  # Redis
+curl -I http://localhost             # Nginx proxy
+```-registration with 30-frame capture process
 - Person-specific directories with JPEG images
 - Pre-computed face encodings for fast matching
 - CSV attendance logs with timestamps and confidence
@@ -17,6 +62,7 @@ A production-ready, containerized face recognition attendance system with mo**�
 ## 🛠️ System Management Commands
 
 ### **🔄 Application Control**
+
 ```bash
 # Start full production stack
 docker-compose --profile monitoring up -d
@@ -35,9 +81,10 @@ docker-compose down
 
 # Restart specific service
 docker-compose restart face-recognition-app
-```
+````
 
 ### **📊 Health Verification**
+
 ```bash
 # Run comprehensive health check
 ./verify_deployment.sh
@@ -53,6 +100,7 @@ curl http://localhost:3000/api/health
 ```
 
 ### **⚡ Performance Scaling**
+
 ```bash
 # Scale application for high load
 docker-compose up -d --scale face-recognition-app=3
@@ -65,7 +113,8 @@ docker system prune -a
 ```
 
 ### **💾 Data Management**
-```bash
+
+````bash
 # Backup face data and attendance
 tar -czf backup_$(date +%Y%m%d).tar.gz backend/known_faces api/attendance.csv
 
@@ -107,14 +156,16 @@ docker-compose --profile monitoring up -d
 
 # Verify deployment
 ./verify_deployment.sh
-```
+````
 
 **Production Access:**
+
 - **Application**: http://localhost:5000
 - **Monitoring**: http://localhost:9090 (Prometheus)
 - **Dashboards**: http://localhost:3000 (Grafana - admin/admin)
 
 ### Option 2: Development Setup
+
 ```bash
 # Traditional setup
 chmod +x run.sh
@@ -122,6 +173,7 @@ chmod +x run.sh
 ```
 
 ### Option 3: Docker Only
+
 ```bash
 # Basic containerized deployment
 docker-compose --profile basic up -d
@@ -136,25 +188,30 @@ docker-compose --profile basic up -d
 Once running, your system provides multiple interfaces:
 
 ### **🎯 Main Application**
+
 - **Primary URL**: http://localhost:5000
 - **Nginx Proxy**: http://localhost (load-balanced access)
 
 ### **� Monitoring & Analytics**
+
 - **Prometheus Metrics**: http://localhost:9090
 - **Grafana Dashboards**: http://localhost:3000 (login: admin/admin)
 
 ### **🗄️ Backend Services**
+
 - **Redis Cache**: localhost:6379
 
 ## �📱 How to Use the Interface
 
 ### 1. **🎥 Real-Time Face Recognition**
+
 - Click **"Start Auto Capture"** button
 - Point your camera at faces
 - System automatically recognizes known people and logs attendance
 - View real-time confidence scores and timestamps
 
 ### 2. **👤 Register New People**
+
 - When an unknown face appears, system automatically prompts for name
 - Enter the person's name in the dialog box
 - System captures 30 training frames automatically
@@ -162,6 +219,7 @@ Once running, your system provides multiple interfaces:
 - No manual training required!
 
 ### 3. **📊 View Attendance & Analytics**
+
 - Real-time attendance display on dashboard
 - Download CSV reports with timestamps
 - View confidence scores for each recognition
@@ -169,6 +227,7 @@ Once running, your system provides multiple interfaces:
 - Access detailed analytics via Grafana dashboards
 
 ### 4. **🔧 System Management**
+
 - Health status indicators for all services
 - Resource usage monitoring
 - Real-time metrics and alerts
@@ -274,6 +333,7 @@ lightweight-face-recognition/
 ## 📈 Monitoring & Analytics
 
 ### **Real-time Metrics Dashboard**
+
 Access your Grafana dashboard at http://localhost:3000 (admin/admin):
 
 - **System Health**: Service uptime, response times, error rates
@@ -283,6 +343,7 @@ Access your Grafana dashboard at http://localhost:3000 (admin/admin):
 - **Performance Metrics**: Request rates, processing times
 
 ### **Prometheus Metrics**
+
 Monitor at http://localhost:9090:
 
 - `up`: Service availability status
@@ -292,6 +353,7 @@ Monitor at http://localhost:9090:
 - `container_memory_usage_bytes`: Resource consumption
 
 ### **Application Logs**
+
 ```bash
 # View real-time application logs
 docker-compose logs -f face-recognition-app
@@ -308,6 +370,7 @@ docker-compose logs --no-color face-recognition-app > app.log
 ### **Common Issues & Solutions**
 
 #### 🔴 Container Won't Start
+
 ```bash
 # Check container status
 docker-compose ps
@@ -320,12 +383,14 @@ docker-compose down -v && docker-compose up -d
 ```
 
 #### 📹 Camera Access Issues
+
 - **Chrome**: Enable camera permissions in browser settings
 - **Firefox**: Allow camera access when prompted
 - **Safari**: Check system camera permissions
 - **HTTPS**: Some browsers require HTTPS for camera access
 
 #### 🎯 Face Recognition Not Working
+
 ```bash
 # Check if known faces exist
 ls -la backend/known_faces/
@@ -338,6 +403,7 @@ docker-compose logs face-recognition-app | grep -i "recognition\|face"
 ```
 
 #### 💾 Memory Issues
+
 ```bash
 # Check resource usage
 docker stats
@@ -350,6 +416,7 @@ docker system prune -a
 ```
 
 #### 🌐 Port Conflicts
+
 ```bash
 # Check what's using the port
 lsof -i :5000
@@ -362,6 +429,7 @@ ports:
 ### **Performance Optimization**
 
 #### For High Load Environments:
+
 ```bash
 # Scale application instances
 docker-compose up -d --scale face-recognition-app=3
@@ -374,6 +442,7 @@ docker stats --no-stream
 ```
 
 #### For Low-Resource Systems:
+
 ```bash
 # Use basic profile (minimal resources)
 docker-compose --profile basic up -d
@@ -486,6 +555,7 @@ GET /health
 ### Recognition Threshold
 
 ```bash
+
 ```
 
 ### Environment Variables
@@ -521,6 +591,7 @@ REDIS_URL=redis://localhost:6379/0
 ## 🚀 Production Deployment
 
 ### **Quick Production Setup**
+
 ```bash
 # Deploy complete production stack
 docker-compose --profile production up -d
@@ -533,6 +604,7 @@ docker-compose --profile monitoring up -d
 ```
 
 ### **Kubernetes Deployment**
+
 ```bash
 # Deploy to Kubernetes cluster
 kubectl apply -f k8s/
@@ -545,6 +617,7 @@ kubectl get pods -l app=face-recognition
 ```
 
 ### **CI/CD Integration**
+
 - GitHub Actions pipeline included
 - Automated testing on multiple Python versions
 - Security scanning with Bandit and Safety
@@ -554,6 +627,7 @@ kubectl get pods -l app=face-recognition
 ## 📈 Performance Metrics
 
 ### **Real-world Performance**
+
 - **Recognition Speed**: ~100-200ms per frame (MacBook M2)
 - **Accuracy**: 95%+ with good lighting conditions
 - **Memory Usage**: ~230MB per container instance
@@ -561,6 +635,7 @@ kubectl get pods -l app=face-recognition
 - **Concurrent Users**: 50+ with load balancing
 
 ### **Scalability**
+
 - **Horizontal Scaling**: Multiple app instances with load balancer
 - **Caching**: Redis for improved response times
 - **Resource Limits**: Configurable memory and CPU constraints
@@ -576,10 +651,10 @@ kubectl get pods -l app=face-recognition
 
 ## 🔄 Version History
 
-| Version | Date | Features | Changes |
-|---------|------|----------|---------|
-| 1.0.0 | 2025-07-18 | Initial Release | Basic face recognition system |
-| 2.0.0 | 2025-07-18 | DevOps Implementation | Full containerization, CI/CD, monitoring |
+| Version | Date       | Features              | Changes                                  |
+| ------- | ---------- | --------------------- | ---------------------------------------- |
+| 1.0.0   | 2025-07-18 | Initial Release       | Basic face recognition system            |
+| 2.0.0   | 2025-07-18 | DevOps Implementation | Full containerization, CI/CD, monitoring |
 
 ## 🤝 Contributing
 
@@ -590,6 +665,7 @@ kubectl get pods -l app=face-recognition
 5. Submit a Pull Request
 
 ### **Development Setup**
+
 ```bash
 # Clone for development
 git clone https://github.com/ayushkumar912/lightweight-face-recognition.git
@@ -636,7 +712,8 @@ For issues, questions, and contributions:
 **⭐ Star this repository if you found it helpful!**
 
 **🎯 Built with ❤️ for enterprise-ready face recognition with complete DevOps automation**
-```
+
+````
 
 ### Manual Setup
 
@@ -646,7 +723,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
 pip install -r requirements.txt
 cd api && python app.py
-```
+````
 
 ### Adding Known Faces Manually
 

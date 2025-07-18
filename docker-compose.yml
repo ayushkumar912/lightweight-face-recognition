@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   # Main face recognition application
   face-recognition-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: face-recognition-app
-    ports:
-      - "5000:5000"
+    # Remove port binding to allow scaling - nginx will handle traffic
+    expose:
+      - "5000"
     volumes:
       # Persistent storage for known faces and attendance data
       - known_faces_data:/app/backend/known_faces
@@ -29,10 +27,36 @@ services:
     networks:
       - face-recognition-network
 
+  # Development service with direct port access (for single instance)
+  face-recognition-app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - known_faces_data:/app/backend/known_faces
+      - attendance_data:/app/api
+      - ./backend/resorces:/app/backend/resorces:ro
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=api/app.py
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - face-recognition-network
+    profiles:
+      - development
+
   # Nginx reverse proxy (optional, for production)
   nginx:
     image: nginx:alpine
-    container_name: face-recognition-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -50,7 +74,6 @@ services:
   # Redis for caching (optional enhancement)
   redis:
     image: redis:alpine
-    container_name: face-recognition-redis
     ports:
       - "6379:6379"
     volumes:
@@ -64,17 +87,16 @@ services:
   # Prometheus monitoring (optional)
   prometheus:
     image: prom/prometheus:latest
-    container_name: face-recognition-prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
     restart: unless-stopped
     networks:
       - face-recognition-network
@@ -84,7 +106,6 @@ services:
   # Grafana for dashboards (optional)
   grafana:
     image: grafana/grafana:latest
-    container_name: face-recognition-grafana
     ports:
       - "3000:3000"
     volumes:

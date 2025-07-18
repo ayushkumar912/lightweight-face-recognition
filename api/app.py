@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 import threading
+import time
 from datetime import datetime
 
 import cv2
@@ -18,8 +19,13 @@ from flask import Flask, jsonify, render_template, request, send_from_directory
 from PIL import Image
 
 # Prometheus metrics
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
-import time
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 # Add backend to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -30,13 +36,25 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Prometheus metrics
-REQUEST_COUNT = Counter('face_recognition_requests_total', 'Total requests', ['method', 'endpoint', 'status'])
-REQUEST_DURATION = Histogram('face_recognition_request_duration_seconds', 'Request duration', ['method', 'endpoint'])
-FACE_RECOGNITION_COUNT = Counter('face_recognitions_total', 'Total face recognitions', ['result'])
-FACE_RECOGNITION_CONFIDENCE = Histogram('face_recognition_confidence', 'Face recognition confidence scores')
-ATTENDANCE_COUNT = Counter('attendance_records_total', 'Total attendance records')
-KNOWN_FACES_GAUGE = Gauge('known_faces_count', 'Number of known faces in system')
-ACTIVE_CONNECTIONS = Gauge('active_connections', 'Number of active connections')
+REQUEST_COUNT = Counter(
+    "face_recognition_requests_total",
+    "Total requests",
+    ["method", "endpoint", "status"],
+)
+REQUEST_DURATION = Histogram(
+    "face_recognition_request_duration_seconds",
+    "Request duration",
+    ["method", "endpoint"],
+)
+FACE_RECOGNITION_COUNT = Counter(
+    "face_recognitions_total", "Total face recognitions", ["result"]
+)
+FACE_RECOGNITION_CONFIDENCE = Histogram(
+    "face_recognition_confidence", "Face recognition confidence scores"
+)
+ATTENDANCE_COUNT = Counter("attendance_records_total", "Total attendance records")
+KNOWN_FACES_GAUGE = Gauge("known_faces_count", "Number of known faces in system")
+ACTIVE_CONNECTIONS = Gauge("active_connections", "Number of active connections")
 
 # Initialize Flask app with frontend paths
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
@@ -47,28 +65,30 @@ app = Flask(
 )
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max file size
 
+
 # Prometheus middleware
 @app.before_request
 def before_request():
     request.start_time = time.time()
     ACTIVE_CONNECTIONS.inc()
 
+
 @app.after_request
 def after_request(response):
     request_duration = time.time() - request.start_time
     REQUEST_DURATION.labels(
-        method=request.method,
-        endpoint=request.endpoint or 'unknown'
+        method=request.method, endpoint=request.endpoint or "unknown"
     ).observe(request_duration)
-    
+
     REQUEST_COUNT.labels(
         method=request.method,
-        endpoint=request.endpoint or 'unknown',
-        status=response.status_code
+        endpoint=request.endpoint or "unknown",
+        status=response.status_code,
     ).inc()
-    
+
     ACTIVE_CONNECTIONS.dec()
     return response
+
 
 # Global error handler to ensure JSON responses
 @app.errorhandler(Exception)
@@ -76,30 +96,31 @@ def handle_exception(e):
     """Catch all unhandled exceptions and return JSON error"""
     logger.error(f"Unhandled exception: {e}")
     import traceback
+
     logger.error(f"Traceback: {traceback.format_exc()}")
-    
+
     # Return JSON error response
-    return jsonify({
-        "error": "Internal server error",
-        "message": str(e),
-        "type": type(e).__name__
-    }), 500
+    return jsonify(
+        {"error": "Internal server error", "message": str(e), "type": type(e).__name__}
+    ), 500
+
 
 @app.errorhandler(413)
 def handle_file_too_large(e):
     """Handle file too large error"""
-    return jsonify({
-        "error": "File too large",
-        "message": "The uploaded file exceeds the maximum size limit of 50MB"
-    }), 413
+    return jsonify(
+        {
+            "error": "File too large",
+            "message": "The uploaded file exceeds the maximum size limit of 50MB",
+        }
+    ), 413
+
 
 @app.errorhandler(400)
 def handle_bad_request(e):
     """Handle bad request error"""
-    return jsonify({
-        "error": "Bad request",
-        "message": str(e)
-    }), 400
+    return jsonify({"error": "Bad request", "message": str(e)}), 400
+
 
 # Global recognizer instance
 recognizer = None
@@ -162,7 +183,7 @@ def decode_image(image_data):
                     return None
             else:
                 base64_data = image_data
-            
+
             # Decode base64
             try:
                 # Remove any whitespace/newlines
@@ -172,7 +193,7 @@ def decode_image(image_data):
             except Exception as e:
                 logger.error(f"Base64 decode error: {e}")
                 return None
-            
+
             # Create PIL Image from bytes
             try:
                 image = Image.open(io.BytesIO(image_bytes))
@@ -180,7 +201,7 @@ def decode_image(image_data):
             except Exception as e:
                 logger.error(f"PIL Image creation error: {e}")
                 return None
-                
+
         else:
             # Handle file upload
             image = Image.open(image_data)
@@ -192,18 +213,21 @@ def decode_image(image_data):
 
         # Convert to numpy array (required by dlib)
         image_array = np.array(image)
-        logger.debug(f"NumPy array shape: {image_array.shape}, dtype: {image_array.dtype}")
-        
+        logger.debug(
+            f"NumPy array shape: {image_array.shape}, dtype: {image_array.dtype}"
+        )
+
         # Validate image dimensions
         if len(image_array.shape) != 3 or image_array.shape[2] != 3:
             logger.error(f"Invalid image shape: {image_array.shape}")
             return None
-            
+
         return image_array
 
     except Exception as e:
         logger.error(f"Error decoding image: {e}")
         import traceback
+
         logger.debug(f"Traceback: {traceback.format_exc()}")
         return None
 
@@ -233,8 +257,8 @@ def metrics():
     # Update known faces gauge
     if recognizer:
         KNOWN_FACES_GAUGE.set(len(recognizer.known_encodings))
-    
-    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
+    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 
 @app.route("/recognize", methods=["POST"])
@@ -279,7 +303,7 @@ def recognize_face():
 
         # Recognize face using direct dlib approach
         result = recognizer.recognize_face(image, tolerance=threshold)
-        
+
         # Add timestamp and threshold info
         result["timestamp"] = datetime.now().isoformat()
         result["threshold"] = threshold
@@ -287,13 +311,13 @@ def recognize_face():
         # Update Prometheus metrics
         if result.get("face_detected"):
             if result.get("name"):
-                FACE_RECOGNITION_COUNT.labels(result='recognized').inc()
+                FACE_RECOGNITION_COUNT.labels(result="recognized").inc()
                 FACE_RECOGNITION_CONFIDENCE.observe(result.get("confidence", 0))
                 ATTENDANCE_COUNT.inc()
             else:
-                FACE_RECOGNITION_COUNT.labels(result='unknown').inc()
+                FACE_RECOGNITION_COUNT.labels(result="unknown").inc()
         else:
-            FACE_RECOGNITION_COUNT.labels(result='no_face').inc()
+            FACE_RECOGNITION_COUNT.labels(result="no_face").inc()
 
         # Log attendance if person is recognized
         if result.get("face_detected") and result.get("name"):
@@ -368,9 +392,11 @@ def get_attendance():
 def register_person():
     """Register a new person using direct dlib approach - simplified and reliable"""
     try:
-        logger.info(f"Register person request received. Content-Type: {request.content_type}")
+        logger.info(
+            f"Register person request received. Content-Type: {request.content_type}"
+        )
         logger.info(f"Request content length: {request.content_length}")
-        
+
         if recognizer is None:
             return jsonify({"error": "Recognizer not initialized"}), 500
 
@@ -382,23 +408,25 @@ def register_person():
         if not data:
             logger.error("No JSON data received")
             return jsonify({"error": "No JSON data received"}), 400
-            
+
         person_name = data.get("name")
         images_data = data.get("images", [])
-        
-        logger.info(f"Registration request for: {person_name}, {len(images_data)} images")
-        
+
+        logger.info(
+            f"Registration request for: {person_name}, {len(images_data)} images"
+        )
+
         if not person_name or not person_name.strip():
             logger.error("Person name is required")
             return jsonify({"error": "Person name is required"}), 400
-            
+
         if not images_data:
             logger.error("At least one image is required")
             return jsonify({"error": "At least one image is required"}), 400
 
         # Use direct dlib registration
         result = recognizer.register_person_direct(person_name.strip(), images_data)
-        
+
         if result["success"]:
             logger.info(f"Successfully registered: {person_name}")
             return jsonify(result), 200
@@ -409,7 +437,9 @@ def register_person():
     except Exception as e:
         logger.error(f"Error registering person: {e}")
         import traceback
+
         logger.error(f"Traceback: {traceback.format_exc()}")
+
 
 @app.route("/reload", methods=["POST"])
 def reload_faces():

@@ -7,23 +7,23 @@ rule_files:
   # - "second_rules.yml"
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'face-recognition-app'
+  - job_name: "face-recognition-app"
     static_configs:
-      - targets: ['face-recognition-app:5000']
-    metrics_path: '/metrics'
+      - targets: ["face-recognition-app:5000"]
+    metrics_path: "/metrics"
     scrape_interval: 30s
 
-  - job_name: 'nginx'
+  - job_name: "nginx"
     static_configs:
-      - targets: ['nginx:80']
-    metrics_path: '/metrics'
+      - targets: ["nginx:80"]
+    metrics_path: "/metrics"
     scrape_interval: 30s
 
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ["redis:6379"]
     scrape_interval: 30s

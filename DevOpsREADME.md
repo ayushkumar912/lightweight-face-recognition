@@ -23,6 +23,7 @@ This document provides comprehensive instructions for DevOps operations, deploym
 ## 🏗️ Architecture Overview
 
 ### System Components
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │     Nginx       │    │  Face Recognition│    │     Redis       │
@@ -39,6 +40,7 @@ This document provides comprehensive instructions for DevOps operations, deploym
 ```
 
 ### Technology Stack
+
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Backend**: Python 3.11, Flask, dlib, OpenCV
 - **Database**: CSV files, Redis (caching)
@@ -55,6 +57,7 @@ This document provides comprehensive instructions for DevOps operations, deploym
 ### Docker Architecture
 
 #### Multi-Stage Dockerfile
+
 ```dockerfile
 # Builder stage - Heavy dependencies
 FROM python:3.11-slim AS builder
@@ -71,6 +74,7 @@ USER appuser
 ```
 
 #### Container Optimization
+
 - **Image Size**: Reduced from ~6GB to ~2GB using multi-stage builds
 - **Security**: Non-root user execution
 - **Health Checks**: Built-in health monitoring
@@ -79,6 +83,7 @@ USER appuser
 ### Docker Commands
 
 #### Build & Run
+
 ```bash
 # Build the application image
 docker build -t face-recognition-app .
@@ -94,6 +99,7 @@ docker run -p 5000:5000 -e DEBUG=true face-recognition-app
 ```
 
 #### Docker Compose Operations
+
 ```bash
 # Start all services
 docker-compose up -d
@@ -115,6 +121,7 @@ docker-compose down -v
 ```
 
 #### Container Management
+
 ```bash
 # List running containers
 docker ps
@@ -139,6 +146,7 @@ docker inspect face-recognition-app
 ### GitHub Actions Workflow
 
 #### Pipeline Stages
+
 1. **Code Quality** - Linting, formatting, security checks
 2. **Testing** - Unit tests, integration tests
 3. **Build** - Docker image creation
@@ -146,6 +154,7 @@ docker inspect face-recognition-app
 5. **Deploy** - Automated deployment
 
 #### Workflow Configuration
+
 **File**: `.github/workflows/ci-cd.yml`
 
 ```yaml
@@ -153,9 +162,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -163,45 +172,46 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9, 3.10, 3.11]
-    
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install flake8 pytest bandit safety
-    
-    - name: Code quality checks
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        bandit -r . -x tests
-        safety check
-    
-    - name: Run tests
-      run: pytest tests/ -v
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake8 pytest bandit safety
+
+      - name: Code quality checks
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          bandit -r . -x tests
+          safety check
+
+      - name: Run tests
+        run: pytest tests/ -v
 
   build:
     needs: test
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: docker build -t face-recognition-app .
-    
-    - name: Test Docker image
-      run: |
-        docker run -d -p 5000:5000 face-recognition-app
-        sleep 10
-        curl -f http://localhost:5000/health
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t face-recognition-app .
+
+      - name: Test Docker image
+        run: |
+          docker run -d -p 5000:5000 face-recognition-app
+          sleep 10
+          curl -f http://localhost:5000/health
 ```
 
 #### Pipeline Features
+
 - **Multi-Python Testing**: Tests on Python 3.9, 3.10, 3.11
 - **Security Scanning**: Bandit for code security, Safety for dependencies
 - **Code Quality**: Flake8 linting
@@ -209,6 +219,7 @@ jobs:
 - **Health Checks**: Validates deployment success
 
 ### Branch Protection
+
 - **Main Branch**: Requires PR reviews
 - **Status Checks**: All CI checks must pass
 - **Up-to-date**: Branches must be current
@@ -220,29 +231,36 @@ jobs:
 ### Environment Profiles
 
 #### Development Environment
+
 ```bash
 # Basic setup - minimal resources
 docker-compose --profile basic up -d
 ```
+
 **Services**: App, Nginx, Redis
 
 #### Production Environment
+
 ```bash
 # Full production stack
 docker-compose --profile production up -d
 ```
+
 **Services**: App, Nginx, Redis + SSL, Health checks
 
 #### Monitoring Environment
+
 ```bash
 # Complete monitoring stack
 docker-compose --profile monitoring up -d
 ```
+
 **Services**: All + Prometheus, Grafana, Metrics
 
 ### Automated Deployment
 
 #### Using Deploy Script
+
 ```bash
 # Deploy with build
 ./deploy.sh --profile monitoring --build
@@ -255,6 +273,7 @@ docker-compose --profile monitoring up -d
 ```
 
 #### Manual Deployment Steps
+
 ```bash
 # 1. Pull latest code
 git pull origin main
@@ -270,6 +289,7 @@ docker-compose up -d --force-recreate --remove-orphans
 ```
 
 ### Deployment Verification
+
 ```bash
 # Automated verification script
 ./verify_deployment.sh
@@ -281,6 +301,7 @@ curl http://localhost:3000/api/health
 ```
 
 ### Rolling Updates
+
 ```bash
 # Update single service
 docker-compose up -d --no-deps face-recognition-app
@@ -296,6 +317,7 @@ docker-compose up -d --scale face-recognition-app=1
 ## 🌍 Environment Setup
 
 ### Prerequisites
+
 - Docker Engine 20.0+
 - Docker Compose 2.0+
 - Git
@@ -303,6 +325,7 @@ docker-compose up -d --scale face-recognition-app=1
 - macOS/Linux/Windows with WSL2
 
 ### Local Development Setup
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/yourusername/face-recognition-system.git
@@ -327,6 +350,7 @@ open http://localhost:5000
 ### Environment Variables
 
 #### Application Configuration
+
 ```bash
 # .env file
 DEBUG=false
@@ -337,6 +361,7 @@ ATTENDANCE_FILE=/app/api/attendance.csv
 ```
 
 #### Docker Configuration
+
 ```bash
 # docker-compose.yml environment
 PYTHONPATH=/app
@@ -345,6 +370,7 @@ TZ=UTC
 ```
 
 ### Production Environment
+
 ```bash
 # Production optimizations
 export COMPOSE_HTTP_TIMEOUT=120
@@ -362,29 +388,32 @@ sysctl vm.max_map_count=262144  # Memory mapping
 ### Prometheus Configuration
 
 #### Metrics Collection
+
 **File**: `monitoring/prometheus.yml`
+
 ```yaml
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'face-recognition-app'
+  - job_name: "face-recognition-app"
     static_configs:
-      - targets: ['face-recognition-app:5000']
+      - targets: ["face-recognition-app:5000"]
     scrape_interval: 30s
     metrics_path: /metrics
 
-  - job_name: 'nginx'
+  - job_name: "nginx"
     static_configs:
-      - targets: ['nginx:80']
+      - targets: ["nginx:80"]
 
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ["redis:6379"]
 ```
 
 #### Key Metrics
+
 - `up`: Service availability
 - `face_recognition_requests_total`: API request count
 - `face_recognition_confidence`: ML model accuracy
@@ -394,12 +423,15 @@ scrape_configs:
 ### Grafana Dashboards
 
 #### Pre-configured Dashboards
+
 1. **System Overview**
+
    - Service health status
    - Resource utilization
    - Request rates
 
 2. **Face Recognition Analytics**
+
    - Recognition accuracy trends
    - Daily attendance patterns
    - Confidence score distributions
@@ -410,6 +442,7 @@ scrape_configs:
    - Storage usage
 
 #### Dashboard Import
+
 ```bash
 # Access Grafana
 open http://localhost:3000
@@ -425,6 +458,7 @@ curl -X POST \
 ### Logging Strategy
 
 #### Application Logs
+
 ```python
 # Structured logging
 import logging
@@ -435,6 +469,7 @@ logging.basicConfig(
 ```
 
 #### Container Logs
+
 ```bash
 # View all service logs
 docker-compose logs -f
@@ -450,16 +485,17 @@ docker-compose logs --no-color face-recognition-app > app.log
 ```
 
 #### Log Aggregation (Optional)
+
 ```yaml
 # Add to docker-compose.yml for ELK stack
 elasticsearch:
   image: elasticsearch:7.9.3
   environment:
     - discovery.type=single-node
-    
+
 logstash:
   image: logstash:7.9.3
-  
+
 kibana:
   image: kibana:7.9.3
   ports:
@@ -469,7 +505,9 @@ kibana:
 ### Alerting
 
 #### Prometheus Alert Rules
+
 **File**: `monitoring/alert_rules.yml`
+
 ```yaml
 groups:
   - name: face_recognition_alerts
@@ -506,7 +544,9 @@ groups:
 ### Deployment Scripts
 
 #### Main Deploy Script
+
 **File**: `deploy.sh`
+
 ```bash
 #!/bin/bash
 # Automated deployment with health checks
@@ -573,7 +613,9 @@ echo "🎉 Deployment completed successfully!"
 ```
 
 #### Verification Script
+
 **File**: `verify_deployment.sh`
+
 ```bash
 #!/bin/bash
 # Comprehensive deployment verification
@@ -593,7 +635,7 @@ check_service() {
   local name=$1
   local url=$2
   local expected=$3
-  
+
   if curl -sf "$url" | grep -q "$expected"; then
     echo "✅ $name: HEALTHY"
   else
@@ -618,7 +660,9 @@ echo "✅ All checks passed! System is ready."
 ### Backup Scripts
 
 #### Data Backup
+
 **File**: `scripts/backup.sh`
+
 ```bash
 #!/bin/bash
 # Backup face recognition data and configurations
@@ -646,6 +690,7 @@ echo "✅ Backup created: $BACKUP_DIR.tar.gz"
 ```
 
 #### Database Backup (if using PostgreSQL)
+
 ```bash
 #!/bin/bash
 # Database backup script
@@ -655,7 +700,9 @@ docker exec postgres pg_dump -U username dbname > backup_$(date +%Y%m%d).sql
 ### Maintenance Scripts
 
 #### System Cleanup
+
 **File**: `scripts/cleanup.sh`
+
 ```bash
 #!/bin/bash
 # System maintenance and cleanup
@@ -684,6 +731,7 @@ echo "✅ Cleanup completed"
 ```
 
 #### Log Rotation
+
 ```bash
 #!/bin/bash
 # Log rotation script
@@ -693,7 +741,9 @@ find ./logs -name "*.log" -size +100M -exec logrotate {} \;
 ### Monitoring Scripts
 
 #### Health Monitor
+
 **File**: `scripts/health_monitor.sh`
+
 ```bash
 #!/bin/bash
 # Continuous health monitoring
@@ -716,6 +766,7 @@ done
 ### Common Issues
 
 #### Container Won't Start
+
 ```bash
 # Check container logs
 docker-compose logs face-recognition-app
@@ -730,6 +781,7 @@ docker-compose up -d
 ```
 
 #### Memory Issues
+
 ```bash
 # Check memory usage
 docker stats
@@ -743,6 +795,7 @@ docker system prune -a
 ```
 
 #### Port Conflicts
+
 ```bash
 # Check port usage
 lsof -i :5000
@@ -754,6 +807,7 @@ ports:
 ```
 
 #### Face Recognition Issues
+
 ```bash
 # Check face encodings
 ls -la backend/known_faces/
@@ -768,6 +822,7 @@ docker-compose logs face-recognition-app | grep -i "face\|recognition\|error"
 ### Performance Optimization
 
 #### Application Tuning
+
 ```python
 # In app.py - optimize for production
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
@@ -775,6 +830,7 @@ app.config['UPLOAD_TIMEOUT'] = 30  # seconds
 ```
 
 #### Docker Optimization
+
 ```dockerfile
 # Multi-stage build optimization
 FROM python:3.11-slim as builder
@@ -785,6 +841,7 @@ FROM python:3.11-slim as runtime
 ```
 
 #### Database Optimization
+
 ```bash
 # Redis tuning
 redis-cli CONFIG SET maxmemory 512mb
@@ -794,6 +851,7 @@ redis-cli CONFIG SET maxmemory-policy allkeys-lru
 ### Debug Mode
 
 #### Enable Debug Logging
+
 ```bash
 # Set environment variable
 export DEBUG=true
@@ -806,6 +864,7 @@ environment:
 ```
 
 #### Development Mode
+
 ```bash
 # Mount source code for live editing
 volumes:
@@ -818,6 +877,7 @@ volumes:
 ## 📚 Additional Resources
 
 ### Documentation Structure
+
 ```
 docs/
 ├── DEVOPS_FEATURES.md      # DevOps capabilities overview
@@ -829,6 +889,7 @@ docs/
 ### Useful Commands Reference
 
 #### Docker Operations
+
 ```bash
 # Quick status check
 docker-compose ps
@@ -847,6 +908,7 @@ docker-compose down -v && docker-compose up -d
 ```
 
 #### Monitoring Commands
+
 ```bash
 # Prometheus metrics
 curl http://localhost:9090/api/v1/query?query=up
@@ -859,6 +921,7 @@ curl http://localhost:5000/metrics
 ```
 
 #### Maintenance Commands
+
 ```bash
 # System cleanup
 docker system prune -a
@@ -871,12 +934,14 @@ docker stats --no-stream
 ```
 
 ### External Resources
+
 - [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 - [Prometheus Documentation](https://prometheus.io/docs/)
 - [Grafana Tutorials](https://grafana.com/tutorials/)
 - [GitHub Actions Guide](https://docs.github.com/en/actions)
 
 ### Support & Contact
+
 - **Issues**: GitHub Issues tracker
 - **Documentation**: `/docs` directory
 - **Monitoring**: Grafana dashboards at http://localhost:3000
@@ -885,11 +950,11 @@ docker stats --no-stream
 
 ## 🔄 Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0.0 | 2025-07-18 | Initial DevOps implementation |
-| 1.1.0 | 2025-07-18 | Added comprehensive monitoring |
-| 1.2.0 | 2025-07-18 | Enhanced CI/CD pipeline |
+| Version | Date       | Changes                        |
+| ------- | ---------- | ------------------------------ |
+| 1.0.0   | 2025-07-18 | Initial DevOps implementation  |
+| 1.1.0   | 2025-07-18 | Added comprehensive monitoring |
+| 1.2.0   | 2025-07-18 | Enhanced CI/CD pipeline        |
 
 ---
 

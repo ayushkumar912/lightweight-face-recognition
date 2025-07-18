@@ -18,12 +18,12 @@
         ],
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 10},
-                {"color": "green", "value": 50}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 10 },
+                { "color": "green", "value": 50 }
               ]
             }
           }
@@ -46,9 +46,9 @@
             "unit": "percent",
             "thresholds": {
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 85},
-                {"color": "green", "value": 95}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 85 },
+                { "color": "green", "value": 95 }
               ]
             }
           }
@@ -72,7 +72,7 @@
       {
         "id": 4,
         "title": "System Resources",
-        "type": "graph", 
+        "type": "graph",
         "targets": [
           {
             "expr": "rate(container_cpu_usage_seconds_total{name=\"face-recognition-app\"}[5m]) * 100",
